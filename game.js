@@ -1,65 +1,72 @@
-// بيانات العالم - يمكنك إضافة غرف هنا لتوسيع عالمك
-const world = {
-    "start": {
-        title: "حافة الغابة",
-        text: "تجد نفسك في طريق ترابي وسط أشجار كثيفة. الضوء يتسلل من بين الأغصان. هناك ممر ضيق يتجه نحو الظلام.",
-        options: [
-            { text: "التقدم نحو الممر المظلم", nextRoom: "deep_forest" },
-            { text: "البحث عن موارد في الأعشاب", nextRoom: "search_grass" }
-        ]
-    },
-    "deep_forest": {
-        title: "أعماق الغابة",
-        text: "الأشجار هنا ضخمة جداً. فجأة، سمعت غصناً ينكسر خلفك! ماذا ستفعل؟",
-        options: [
-            { text: "الاختباء خلف شجرة", nextRoom: "hide" },
-            { text: "الجري للأمام", nextRoom: "run" },
-            { text: "العودة للخلف", nextRoom: "start" }
-        ]
-    },
-    "search_grass": {
-        title: "بين الأعشاب",
-        text: "وجدت خنجراً قديماً صدئاً! ربما سيفيدك لاحقاً.",
-        options: [
-            { text: "العودة للطريق", nextRoom: "start" }
-        ]
-    },
-    "hide": {
-        title: "منطقة الأمان",
-        text: "مرّ حيوان غريب بجانبك ولم يراك. لقد نجوت هذه المرة.",
-        options: [
-            { text: "متابعة الاستكشاف", nextRoom: "start" }
-        ]
-    }
-};
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const knob = document.getElementById('joystick-knob');
+const container = document.getElementById('joystick-container');
 
-// وظيفة لتحديث محتوى اللعبة على الشاشة
-function updateRoom(roomKey) {
-    const room = world[roomKey];
-    
-    // تحديث العناوين والنصوص
-    document.getElementById("location-title").innerText = room.title;
-    document.getElementById("description").innerText = room.text;
-    
-    // مسح الأزرار القديمة وإنشاء الجديدة
-    const optionsDiv = document.getElementById("options");
-    optionsDiv.innerHTML = ""; 
+// إعدادات العالم
+let worldImage = new Image();
+worldImage.src = 'https://r2.erweima.ai/i/6O6y_e7XReWjX_q44i8K0Q.jpg'; // صورتك المفضلة
 
-    room.options.forEach(option => {
-        const btn = document.createElement("button");
-        btn.innerText = option.text;
-        btn.onclick = () => {
-            // إضافة تأثير بسيط عند الانتقال
-            document.getElementById("game-container").style.opacity = 0;
-            setTimeout(() => {
-                updateRoom(option.nextRoom);
-                document.getElementById("game-container").style.opacity = 1;
-            }, 200);
-        };
-        optionsDiv.appendChild(btn);
-    });
+let viewX = 0;
+let viewY = 0;
+let speed = 5;
+
+// إعدادات الجوستك
+let dragging = false;
+let joystickData = { x: 0, y: 0 };
+
+// ضبط حجم الشاشة
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// أحداث اللمس للجوستك
+container.addEventListener('touchstart', (e) => { dragging = true; });
+window.addEventListener('touchend', () => { 
+    dragging = false; 
+    knob.style.transform = `translate(0px, 0px)`;
+    joystickData = { x: 0, y: 0 };
+});
+
+window.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    const touch = e.touches[0];
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    let dx = touch.clientX - centerX;
+    let dy = touch.clientY - centerY;
+    
+    // حصر الحركة داخل الدائرة
+    const distance = Math.min(60, Math.sqrt(dx*dx + dy*dy));
+    const angle = Math.atan2(dy, dx);
+    
+    joystickData.x = Math.cos(angle) * (distance / 60);
+    joystickData.y = Math.sin(angle) * (distance / 60);
+    
+    knob.style.transform = `translate(${Math.cos(angle)*distance}px, ${Math.sin(angle)*distance}px)`;
+});
+
+// حلقة اللعبة (Game Loop)
+function update() {
+    // تحريك الكاميرا بناءً على الجوستك
+    viewX += joystickData.x * speed;
+    viewY += joystickData.y * speed;
+
+    // رسم الخلفية (تتكرر لتعطي إيحاء بعالم واسع)
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // رسم الصورة بحيث نتحرك داخلها
+    // ملاحظة: هنا نقوم برسم الصورة أكبر من الشاشة لتحريكها
+    ctx.drawImage(worldImage, -viewX, -viewY, worldImage.width * 2, worldImage.height * 2);
+
+    requestAnimationFrame(update);
 }
 
-// بدء اللعبة من أول غرفة
-updateRoom("start");
-
+worldImage.onload = () => {
+    update();
+};
