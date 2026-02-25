@@ -2,42 +2,149 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>استكشاف الغابة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول أو إنشاء حساب - مزود الخدمة</title>
+    <link rel="stylesheet" href="css/style.css">
     <style>
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; }
-        #gameCanvas { display: block; width: 100vw; height: 100vh; }
-        
-        /* تصميم الجوستك */
-        #joystick-container {
-            position: absolute;
-            bottom: 50px;
-            left: 50px;
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
+        /* أنماط إضافية للتبويبات */
+        .tabs {
             display: flex;
             justify-content: center;
-            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
         }
-        #joystick-knob {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            position: relative;
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #555;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+            font-weight: bold;
+        }
+        .form-container {
+            display: none;
+        }
+        .form-container.active {
+            display: block;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>مرحباً بك في مزود الخدمة</h1>
+        
+        <!-- التبويبات -->
+        <div class="tabs">
+            <button class="tab active" id="loginTab">تسجيل الدخول</button>
+            <button class="tab" id="signupTab">إنشاء حساب</button>
+        </div>
 
-    <canvas id="gameCanvas"></canvas>
+        <!-- نموذج تسجيل الدخول -->
+        <div id="loginFormContainer" class="form-container active">
+            <form id="loginForm">
+                <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required>
+                <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
+                <button type="submit">دخول</button>
+            </form>
+        </div>
 
-    <div id="joystick-container">
-        <div id="joystick-knob"></div>
+        <!-- نموذج إنشاء حساب -->
+        <div id="signupFormContainer" class="form-container">
+            <form id="signupForm">
+                <input type="email" id="signupEmail" placeholder="البريد الإلكتروني" required>
+                <input type="password" id="signupPassword" placeholder="كلمة المرور" required>
+                <button type="submit">إنشاء حساب</button>
+            </form>
+        </div>
     </div>
 
-    <script src="game.js"></script>
+    <!-- استيراد Firebase (CDN) -->
+    <script type="module">
+        // استيراد المكتبات
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // إعداد Firebase (استخدم الإعدادات الخاصة بك)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWZf2IbNO2L61TCIgX1ZOw1smwiOX-ykQ",
+            authDomain: "support-group-9fb1c.firebaseapp.com",
+            projectId: "support-group-9fb1c",
+            storageBucket: "support-group-9fb1c.firebasestorage.app",
+            messagingSenderId: "951502251740",
+            appId: "1:951502251740:web:fd4b8059ee2a07764cf619",
+            measurementId: "G-E6PWD6CRJL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // عناصر الصفحة
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginContainer = document.getElementById('loginFormContainer');
+        const signupContainer = document.getElementById('signupFormContainer');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+
+        // تبديل التبويبات
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginContainer.classList.add('active');
+            signupContainer.classList.remove('active');
+        });
+
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupContainer.classList.add('active');
+            loginContainer.classList.remove('active');
+        });
+
+        // تسجيل الدخول
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                alert('خطأ في تسجيل الدخول: ' + error.message);
+            }
+        });
+
+        // إنشاء حساب
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // إضافة المستخدم إلى Firestore برصيد 0
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: email,
+                    balance: 0,
+                    createdAt: new Date()
+                });
+
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                alert('خطأ في إنشاء الحساب: ' + error.message);
+            }
+        });
+    </script>
 </body>
 </html>
