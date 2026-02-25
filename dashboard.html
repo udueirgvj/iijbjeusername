@@ -2,48 +2,297 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الرئيسية - مزود الخدمة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مزود الخدمة - الرئيسية</title>
+    <!-- Font Awesome و Material Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* أنماط إضافية للقائمة الجانبية والخلفية */
+        body {
+            background: linear-gradient(135deg, #0b0f2a, #1a1f3f);
+            /* يمكن استبدال التدرج بصورة خلفية */
+            /* background: url('https://images.unsplash.com/...') center/cover fixed; */
+        }
+
+        /* القائمة الجانبية */
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 260px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            border-radius: 0 20px 20px 0;
+        }
+
+        .side-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .drawer-header h3 {
+            margin: 0;
+            color: #667eea;
+        }
+
+        .close-drawer {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ff6b6b;
+        }
+
+        .drawer-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .drawer-menu li {
+            margin-bottom: 15px;
+        }
+
+        .drawer-menu a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .drawer-menu a:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .drawer-menu i {
+            color: #667eea;
+        }
+
+        /* خلفية التطبيق */
+        .app-background {
+            min-height: 100vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* الهيدر مع أيقونة القائمة */
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .menu-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* تعديل الهيدر الأصلي */
+        header {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        .balance {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            box-shadow: none;
+        }
+
+        #logout {
+            background: rgba(255, 107, 107, 0.8);
+            box-shadow: none;
+        }
+
+        /* بطاقات الخدمة بشكل أندرويد */
+        .services-grid {
+            gap: 15px;
+        }
+
+        .service-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 15px;
+        }
+
+        .service-card i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .service-card h3 {
+            font-size: 16px;
+        }
+
+        /* تأثير النقر */
+        .service-card:active {
+            transform: scale(0.98);
+        }
+
+        /* تذييل */
+        footer {
+            color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>مزود الخدمة</h1>
-        <div class="balance">رصيدك: <span id="balance">0</span> $</div>
-        <button id="logout">تسجيل خروج</button>
-    </header>
-    <main>
-        <h2>اختر نوع الاشتراك</h2>
-        <div class="services-grid">
-            <a href="satellite.html" class="service-card">الأقمار الصناعية</a>
-            <a href="fiber.html" class="service-card">الألياف المحلية</a>
-            <a href="app.html" class="service-card">تطبيق</a>
-            <a href="esim.html" class="service-card">شريحة إلكترونية</a>
-            <a href="sim.html" class="service-card">شريحة</a>
+    <!-- القائمة الجانبية -->
+    <div class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <h3><i class="fas fa-satellite-dish"></i> القائمة</h3>
+            <button class="close-drawer" id="closeDrawer"><i class="fas fa-times"></i></button>
         </div>
-    </main>
-    <script type="module" src="js/firebase-init.js"></script>
-    <script type="module">
-        import { auth, db } from './js/firebase-init.js';
-        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        <ul class="drawer-menu">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> الملف الشخصي</a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+            <li><a href="support.html"><i class="fas fa-headset"></i> الدعم</a></li>
+        </ul>
+    </div>
 
-        // التحقق من حالة تسجيل الدخول
+    <div class="app-background">
+        <div class="container">
+            <header>
+                <div class="app-header">
+                    <span class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></span>
+                    <h1><i class="fas fa-satellite-dish"></i> مزود الخدمة</h1>
+                </div>
+                <div class="balance">
+                    <i class="fas fa-wallet"></i> رصيدك: <span id="balance">0</span> $
+                </div>
+                <button id="logout"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</button>
+            </header>
+
+            <main>
+                <h2>اختر نوع الاشتراك</h2>
+                <div class="services-grid">
+                    <a href="satellite.html" class="service-card">
+                        <i class="fas fa-satellite"></i>
+                        <h3>الأقمار الصناعية</h3>
+                    </a>
+                    <a href="fiber.html" class="service-card">
+                        <i class="fas fa-network-wired"></i>
+                        <h3>الألياف المحلية</h3>
+                    </a>
+                    <a href="app.html" class="service-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>تطبيق</h3>
+                    </a>
+                    <a href="esim.html" class="service-card">
+                        <i class="fas fa-sim-card"></i>
+                        <h3>شريحة إلكترونية</h3>
+                    </a>
+                    <a href="sim.html" class="service-card">
+                        <i class="fas fa-microchip"></i>
+                        <h3>شريحة</h3>
+                    </a>
+                </div>
+            </main>
+
+            <footer>
+                <p>جميع الحقوق محفوظة &copy; 2025 مزود الخدمة</p>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        // استيراد Firebase (كما هو)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWZf2IbNO2L61TCIgX1ZOw1smwiOX-ykQ",
+            authDomain: "support-group-9fb1c.firebaseapp.com",
+            projectId: "support-group-9fb1c",
+            storageBucket: "support-group-9fb1c.firebasestorage.app",
+            messagingSenderId: "951502251740",
+            appId: "1:951502251740:web:fd4b8059ee2a07764cf619",
+            measurementId: "G-E6PWD6CRJL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // عناصر القائمة الجانبية
+        const sideDrawer = document.getElementById('sideDrawer');
+        const menuToggle = document.getElementById('menuToggle');
+        const closeDrawer = document.getElementById('closeDrawer');
+
+        menuToggle.addEventListener('click', () => {
+            sideDrawer.classList.add('open');
+        });
+
+        closeDrawer.addEventListener('click', () => {
+            sideDrawer.classList.remove('open');
+        });
+
+        // إغلاق القائمة عند النقر خارجها (اختياري)
+        window.addEventListener('click', (e) => {
+            if (!sideDrawer.contains(e.target) && !menuToggle.contains(e.target) && sideDrawer.classList.contains('open')) {
+                sideDrawer.classList.remove('open');
+            }
+        });
+
+        // التحقق من حالة تسجيل الدخول وجلب الرصيد
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = 'login.html';
+                window.location.href = 'auth.html';
                 return;
             }
-            // جلب الرصيد من Firestore
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists()) {
-                document.getElementById('balance').textContent = userDoc.data().balance || 0;
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById('balance').textContent = userDoc.data().balance || 0;
+                }
+            } catch (error) {
+                console.error("خطأ في جلب الرصيد:", error);
             }
         });
 
         // تسجيل الخروج
         document.getElementById('logout').addEventListener('click', async () => {
-            await signOut(auth);
-            window.location.href = 'login.html';
+            try {
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                alert('خطأ في تسجيل الخروج: ' + error.message);
+            }
         });
     </script>
 </body>
