@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اشتراك الأقمار الصناعية</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>الأقمار الصناعية</h1>
+        <a href="dashboard.html">الرجوع للرئيسية</a>
+    </header>
+    <main>
+        <p>اختر الباقة المناسبة:</p>
+        <div class="packages">
+            <div class="package">
+                <h3>باقة 10 ميجابت</h3>
+                <p>السعر: 20$ / شهرياً</p>
+                <button onclick="purchase('satellite_basic', 20)">اشتر الآن</button>
+            </div>
+            <!-- باقي الباقات -->
+        </div>
+    </main>
+    <script type="module">
+        import { auth, db } from './js/firebase-init.js';
+        import { doc, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        window.purchase = async (packageId, price) => {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('الرجاء تسجيل الدخول أولاً');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+            const currentBalance = userSnap.data().balance || 0;
+
+            if (currentBalance < price) {
+                alert('رصيدك غير كافٍ!');
+                return;
+            }
+
+            // خصم الرصيد
+            await updateDoc(userRef, {
+                balance: increment(-price)
+            });
+
+            // تسجيل الاشتراك في مجموعة subscriptions
+            const subscriptionRef = doc(db, 'subscriptions', `${user.uid}_${packageId}_${Date.now()}`);
+            await setDoc(subscriptionRef, {
+                userId: user.uid,
+                packageId: packageId,
+                price: price,
+                type: 'satellite',
+                purchasedAt: new Date()
+            });
+
+            alert('تم الاشتراك بنجاح!');
+            // تحديث الرصيد الظاهر في الصفحة (يمكن إعادة التوجيه للرئيسية)
+        };
+    </script>
+</body>
+</html>
