@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شريحة إلكترونية - مزود الخدمة</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop') center/cover fixed;
+            min-height: 100vh;
+        }
+
+        .app-background {
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* الهيدر */
+        header {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-icon {
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        header h1 {
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance {
+            background: rgba(255,255,255,0.25);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        #logout {
+            background: rgba(255,107,107,0.8);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* القائمة الجانبية */
+        .side-drawer {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 260px;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+            border-radius: 0 20px 20px 0;
+        }
+
+        .side-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .drawer-header h3 {
+            color: #667eea;
+        }
+
+        .close-drawer {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ff6b6b;
+        }
+
+        .drawer-menu {
+            list-style: none;
+        }
+
+        .drawer-menu li {
+            margin-bottom: 15px;
+        }
+
+        .drawer-menu a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .drawer-menu i {
+            color: #667eea;
+        }
+
+        /* عنوان الصفحة */
+        .page-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* شبكة الباقات */
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .package-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+
+        .package-card:active {
+            transform: scale(0.97);
+        }
+
+        .package-card i {
+            font-size: 40px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .package-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .package-card .price {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .package-card .period {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* رسالة الخطأ */
+        .error-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 5px 20px rgba(255,68,68,0.5);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .error-toast.show {
+            display: flex;
+        }
+
+        /* تذييل */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- القائمة الجانبية -->
+    <div class="side-drawer" id="sideDrawer">
+        <div class="drawer-header">
+            <h3><i class="fas fa-satellite-dish"></i> القائمة</h3>
+            <button class="close-drawer" id="closeDrawer"><i class="fas fa-times"></i></button>
+        </div>
+        <ul class="drawer-menu">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> الرئيسية</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> الملف الشخصي</a></li>
+            <li><a href="recharge.html"><i class="fas fa-credit-card"></i> شحن الرصيد</a></li>
+            <li><a href="support.html"><i class="fas fa-headset"></i> الدعم</a></li>
+        </ul>
+    </div>
+
+    <div class="app-background">
+        <div class="container">
+            <header>
+                <div class="header-right">
+                    <span class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></span>
+                    <h1><i class="fas fa-sim-card"></i> شريحة إلكترونية</h1>
+                </div>
+                <div class="balance">
+                    <i class="fas fa-wallet"></i> رصيدك: <span id="balance">0</span> $
+                </div>
+                <button id="logout"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</button>
+            </header>
+
+            <main>
+                <h2 class="page-title">اختر مدة الاشتراك</h2>
+                <div class="packages-grid" id="packagesContainer">
+                    <!-- الباقات ستتم إضافتها عبر JavaScript -->
+                </div>
+            </main>
+
+            <footer>
+                <p>جميع الحقوق محفوظة &copy; 2025 مزود الخدمة</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- رسالة الخطأ -->
+    <div id="errorToast" class="error-toast">
+        <i class="fas fa-exclamation-circle"></i> لا يوجد رصيد كافي
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWZf2IbNO2L61TCIgX1ZOw1smwiOX-ykQ",
+            authDomain: "support-group-9fb1c.firebaseapp.com",
+            projectId: "support-group-9fb1c",
+            storageBucket: "support-group-9fb1c.firebasestorage.app",
+            messagingSenderId: "951502251740",
+            appId: "1:951502251740:web:fd4b8059ee2a07764cf619",
+            measurementId: "G-E6PWD6CRJL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // عناصر الصفحة
+        const balanceSpan = document.getElementById('balance');
+        const packagesContainer = document.getElementById('packagesContainer');
+        const errorToast = document.getElementById('errorToast');
+        let currentUser = null;
+        let redirectTimer = null;
+
+        // قائمة الباقات: شهر - 12 شهر (السعر = 35 * عدد الشهور)
+        const months = Array.from({ length: 12 }, (_, i) => i + 1);
+        
+        // عرض الباقات
+        function renderPackages() {
+            packagesContainer.innerHTML = months.map(month => {
+                const price = 35 * month;
+                return `
+                    <div class="package-card" data-months="${month}" data-price="${price}">
+                        <i class="fas fa-sim-card"></i>
+                        <h3>${month} شهر</h3>
+                        <div class="price">${price}$</div>
+                        <div class="period">${month === 1 ? 'شهر' : 'أشهر'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // التحقق من الرصيد والاشتراك
+        async function handlePackageClick(e) {
+            const card = e.target.closest('.package-card');
+            if (!card) return;
+
+            const months = parseInt(card.dataset.months);
+            const price = parseInt(card.dataset.price);
+
+            if (!currentUser) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            try {
+                const userRef = doc(db, 'users', currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                const currentBalance = userSnap.exists() ? userSnap.data().balance || 0 : 0;
+
+                if (currentBalance < price) {
+                    // إظهار رسالة الخطأ
+                    errorToast.classList.add('show');
+                    
+                    // إلغاء أي توجيه سابق
+                    if (redirectTimer) clearTimeout(redirectTimer);
+                    
+                    // التوجيه إلى صفحة الشحن بعد 4 ثوانٍ
+                    redirectTimer = setTimeout(() => {
+                        window.location.href = 'recharge.html';
+                    }, 4000);
+                    
+                    return;
+                }
+
+                // الرصيد كافٍ - تنفيذ الاشتراك
+                // خصم الرصيد
+                await updateDoc(userRef, {
+                    balance: increment(-price)
+                });
+
+                // تسجيل الاشتراك
+                const subscriptionRef = doc(db, 'subscriptions', `${currentUser.uid}_esim_${Date.now()}`);
+                await setDoc(subscriptionRef, {
+                    userId: currentUser.uid,
+                    type: 'esim',
+                    months: months,
+                    price: price,
+                    purchasedAt: new Date()
+                });
+
+                // تحديث الرصيد في الواجهة
+                balanceSpan.textContent = (currentBalance - price).toString();
+
+                // رسالة نجاح (يمكن إضافة Toast نجاح)
+                alert(`تم الاشتراك بنجاح في باقة ${months} شهر`);
+
+            } catch (error) {
+                console.error('خطأ:', error);
+                alert('حدث خطأ: ' + error.message);
+            }
+        }
+
+        // التحقق من حالة المستخدم
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+            currentUser = user;
+            
+            // جلب الرصيد
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    balanceSpan.textContent = userDoc.data().balance || 0;
+                }
+            } catch (error) {
+                console.error('خطأ في جلب الرصيد:', error);
+            }
+        });
+
+        // تسجيل الخروج
+        document.getElementById('logout').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = 'auth.html';
+        });
+
+        // القائمة الجانبية
+        const sideDrawer = document.getElementById('sideDrawer');
+        const menuToggle = document.getElementById('menuToggle');
+        const closeDrawer = document.getElementById('closeDrawer');
+
+        menuToggle.addEventListener('click', () => {
+            sideDrawer.classList.add('open');
+        });
+
+        closeDrawer.addEventListener('click', () => {
+            sideDrawer.classList.remove('open');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (!sideDrawer.contains(e.target) && !menuToggle.contains(e.target) && sideDrawer.classList.contains('open')) {
+                sideDrawer.classList.remove('open');
+            }
+        });
+
+        // عرض الباقات عند تحميل الصفحة
+        renderPackages();
+
+        // إضافة مستمع النقر على البطاقات (استخدام event delegation)
+        packagesContainer.addEventListener('click', handlePackageClick);
+    </script>
+</body>
+</html>
